@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import {OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
+import { ProveedorService } from '../services/proveedor.service';
 
 interface Supplier {
   id: number;
@@ -30,70 +29,87 @@ export class ProveedoresComponent implements OnInit {
   filteredSuppliers: Supplier[] = [];
   searchTerm: string = '';
 
-  // Modal
+
   isModalOpen: boolean = false;
 
-  //variables para nuevoModalPedidos
+
   selectedSupplier: Supplier | null = null;
   orderData: any = {};
   isOrderModalOpen: boolean = false;
 
+  // Sesión
+  isLoggedIn: boolean = false;
+  nombreUsuario: string = '';
+  esAdmin: boolean = false;
 
-  // Nuevo proveedor temporal
+
+
+
   newSupplier: any = {
     name: '',
     email: '',
     phone: '',
     address: '',
+    ruc: '',
     productsText: '',
   };
 
-  ngOnInit(): void {
-    // Datos iniciales simulados
-    this.suppliers = [
-      {
-        id: 1,
-        name: 'Herbal Life Colombia',
-        email: 'contacto@herbalcol.com',
-        phone: '+57 3124567890',
-        address: 'Calle 12 #45-23, Bogotá',
-        products: ['Suplementos', 'Proteínas', 'Té verde'],
-        lastOrder: '2025-10-12',
-        status: 'Activo',
-        rating: 4.5
-      },
-      {
-        id: 2,
-        name: 'Distribuciones Naturales S.A.',
-        email: 'ventas@disnat.com',
-        phone: '+57 3109876543',
-        address: 'Carrera 7 #22-10, Cali',
-        products: ['Aceites esenciales', 'Vitaminas'],
-        lastOrder: '2025-09-05',
-        status: 'Pendiente',
-        rating: 3.8
-      },
-      {
-        id: 3,
-        name: 'Verde Salud',
-        email: 'info@verdesalud.com',
-        phone: '+57 3014561234',
-        address: 'Av. Panamericana #10-50, Popayán',
-        products: ['Jarabes naturales', 'Cápsulas vegetales'],
-        lastOrder: '2025-11-02',
-        status: 'Activo',
-        rating: 4.9
-      }
-    ];
+  constructor(private router: Router, private proveedorService: ProveedorService) { }
 
-    this.filteredSuppliers = [...this.suppliers];
+  ngOnInit(): void {
+    this.verificarSesion();
+    this.cargarProveedores();
+  }
+
+  cargarProveedores(): void {
+    this.proveedorService.listar().subscribe({
+      next: (data) => {
+        this.suppliers = data.map((p: any) => ({
+          id: p.id,
+          name: p.nombre,
+          email: p.correo,
+          phone: p.telefono,
+          address: p.direccion,
+          products: [],
+          lastOrder: '—',
+          status: 'Activo' as 'Activo',
+          rating: 0
+        }));
+        this.filteredSuppliers = [...this.suppliers];
+      },
+      error: (err) => console.error('Error al cargar proveedores:', err)
+    });
+  }
+
+  verificarSesion(): void {
+    if (typeof window !== 'undefined') {
+      const usuarioRaw = localStorage.getItem('usuario');
+      if (usuarioRaw) {
+        const usuarioParsed = JSON.parse(usuarioRaw);
+        this.isLoggedIn = true;
+        this.nombreUsuario = usuarioParsed.nombre || 'Administrador';
+        this.esAdmin = usuarioParsed.rol?.toUpperCase() === 'ADMIN';
+        console.log('ROL:', usuarioParsed.rol);
+        console.log('ES ADMIN:', this.esAdmin);
+      } else {
+        this.isLoggedIn = false;
+        this.nombreUsuario = '';
+        this.esAdmin = false;
+      }
+    }
+  }
+
+  cerrarSesion(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    this.isLoggedIn = false;
+    this.router.navigate(['/login']);
   }
 
   filterSuppliers(): void {
     const term = this.searchTerm.toLowerCase();
-
-    if(term ===''){
-      this.filteredSuppliers =[...this.suppliers];
+    if (term === '') {
+      this.filteredSuppliers = [...this.suppliers];
       return;
     }
 
@@ -103,9 +119,7 @@ export class ProveedoresComponent implements OnInit {
     );
   }
 
-  openModal(): void {
-    this.isModalOpen = true;
-  }
+  openModal(): void { this.isModalOpen = true; }
 
   closeModal(): void {
     this.isModalOpen = false;
@@ -114,9 +128,7 @@ export class ProveedoresComponent implements OnInit {
 
   closeModalOnOutside(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    if (target.classList.contains('modal')) {
-      this.closeModal();
-    }
+    if (target.classList.contains('modal')) this.closeModal();
   }
 
   addSupplier(): void {
@@ -125,31 +137,52 @@ export class ProveedoresComponent implements OnInit {
       return;
     }
 
-    const newId = this.suppliers.length > 0 ? Math.max(...this.suppliers.map(s => s.id)) + 1 : 1;
-
-    const supplier: Supplier = {
-      id: newId,
-      name: this.newSupplier.name.trim(),
-      email: this.newSupplier.email.trim(),
-      phone: this.newSupplier.phone.trim(),
-      address: this.newSupplier.address?.trim() || '',
-      products: this.newSupplier.productsText
-        ? this.newSupplier.productsText.split(',').map((p: string) => p.trim()).filter((p: string) => p)
-        : [],
-      lastOrder: '—',
-      status: 'Pendiente',
-      rating: 0
+    const proveedorEnviar = {
+      nombre: this.newSupplier.name.trim(),
+      correo: this.newSupplier.email.trim(),
+      telefono: this.newSupplier.phone.trim(),
+      direccion: this.newSupplier.address?.trim() || '',
+      ruc: this.newSupplier.ruc?.trim() || ''
     };
 
-    this.suppliers.push(supplier);
-    this.filterSuppliers();
-    this.closeModal();
+    this.proveedorService.crear(proveedorEnviar).subscribe({
+      next: (nuevo) => {
+        const supplier: Supplier = {
+          id: nuevo.id,
+          name: nuevo.nombre,
+          email: nuevo.correo,
+          phone: nuevo.telefono,
+          address: nuevo.direccion,
+          products: [],
+          lastOrder: '—',
+          status: 'Activo',
+          rating: 0
+        };
+        this.suppliers.push(supplier);
+        this.filterSuppliers();
+        this.closeModal();
+        alert('Proveedor registrado correctamente.');
+      },
+      error: () => alert('Error al registrar proveedor.')
+    });
   }
 
   deleteSupplier(id: number): void {
     if (confirm('¿Seguro que deseas eliminar este proveedor?')) {
-      this.suppliers = this.suppliers.filter(s => s.id !== id);
-      this.filterSuppliers();
+      this.proveedorService.eliminar(id).subscribe({
+        next: () => {
+          this.suppliers = this.suppliers.filter(s => s.id !== id);
+          this.filterSuppliers();
+        },
+        error: (err: any) => {
+          if (err.status === 200 || err.status === 0) {
+            this.suppliers = this.suppliers.filter(s => s.id !== id);
+            this.filterSuppliers();
+          } else {
+            alert('Error al eliminar proveedor.');
+          }
+        }
+      });
     }
   }
 
@@ -160,19 +193,15 @@ export class ProveedoresComponent implements OnInit {
   newOrder(id: number): void {
     const supplier = this.suppliers.find(s => s.id === id);
     if (!supplier) return;
-    
-      this.selectedSupplier = supplier;
-
-  this.orderData = {
-    date: new Date().toISOString().substring(0, 10),
-    quantities: supplier.products.reduce((acc, p) => {
-      acc[p] = 0;
-      return acc;
-    }, {} as any)
-  };
-
-  this.isOrderModalOpen = true;
-
+    this.selectedSupplier = supplier;
+    this.orderData = {
+      date: new Date().toISOString().substring(0, 10),
+      quantities: supplier.products.reduce((acc, p) => {
+        acc[p] = 0;
+        return acc;
+      }, {} as any)
+    };
+    this.isOrderModalOpen = true;
   }
 
   getActiveCount(): number {
@@ -196,28 +225,19 @@ export class ProveedoresComponent implements OnInit {
   }
 
   confirmOrder(): void {
-  if (!this.selectedSupplier) return;
-
-  this.selectedSupplier.lastOrder = this.orderData.date;
-
-  alert("Pedido registrado con éxito.");
-
-  this.isOrderModalOpen = false;
+    if (!this.selectedSupplier) return;
+    this.selectedSupplier.lastOrder = this.orderData.date;
+    alert('Pedido registrado con éxito.');
+    this.isOrderModalOpen = false;
   }
 
   closeOrderModal(event: MouseEvent): void {
-  if ((event.target as HTMLElement).classList.contains('modal')) {
-    this.isOrderModalOpen = false;
+    if ((event.target as HTMLElement).classList.contains('modal')) {
+      this.isOrderModalOpen = false;
     }
   }
 
   private resetForm(): void {
-    this.newSupplier = {
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-      productsText: ''
-    };
+    this.newSupplier = { name: '', email: '', phone: '', address: '', ruc: '', productsText: '' };
   }
 }

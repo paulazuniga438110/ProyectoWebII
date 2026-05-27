@@ -1,48 +1,67 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-
+import { RouterModule, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../environments/environment';
 @Component({
   selector: 'app-login',
   standalone: true,
   templateUrl: './login.component.html',
-  imports: [CommonModule, RouterModule, FormsModule], //importamos FormsModule para la conexion entre el html y ts
+  imports: [CommonModule, RouterModule, FormsModule],
   styleUrls: ['./login.component.css']
 })
 
-//logica del login
-export class LoginComponent {
-  email: string= "";
-  password: string= "";
-  mensajeError: string="";
 
-   // nuevos mensajes específicos por campo
-  mensajeEmail: string = "";
-  mensajePassword: string = "";
+export class LoginComponent {
+  email: string = '';
+  password: string = '';
+  mensajeError: string = '';
+  mensajeEmail: string = '';
+  mensajePassword: string = '';
+
+  constructor(private http: HttpClient, private router: Router) {}
 
   iniciarSesion() {
-    //limpiamos mensaje anterior
-    this.mensajeError= '';
+    this.mensajeError = '';
     this.mensajeEmail = '';
     this.mensajePassword = '';
 
-    //validacion de campos vacios
-    if(!this.email.trim() && !this.password.trim()){
-      this.mensajeError= 'Por favor, complete todos los campos';
-    } else if(!this.email.trim()){
+    if (!this.email.trim() && !this.password.trim()) {
+      this.mensajeError = 'Por favor, complete todos los campos';
+      return;
+    }
+    if (!this.email.trim()) {
       this.mensajeEmail = 'Por favor, ingrese su correo electrónico';
-    }else if (/^\S+@.*$/.test(this.email)) {
-      this.mensajeEmail = 'El correo debe tener una palabra seguida de @ (ejemplo: juan@)';
-    } 
-    else if(!this.password.trim()){
+      return;
+    }
+    if (!this.password.trim()) {
       this.mensajePassword = 'Por favor, ingrese su contraseña';
-    }else{
-      alert('inicio de sesion exitoso(sin conexion a base de datos)')
+      return;
     }
 
-    
+    this.http.post<any>(`${environment.apiUrl}/auth/login`, {
+      correo: this.email,
+      pass: this.password
+    }).subscribe({
+      next: (response) => {
+        
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('usuario', JSON.stringify(response));
+
+        // Redirige según rol
+        const rol = response.rol.toUpperCase();
+        if (rol === 'ADMIN') {
+          this.router.navigate(['/clientes']);
+        } else if (rol === 'CLIENTE') {
+          this.router.navigate(['/productos']);
+        } else {
+          this.router.navigate(['/home']);
+        }
+      },
+      error: () => {
+        this.mensajeError = 'Correo o contraseña incorrectos';
+      }
+    });
   }
-
-
 }

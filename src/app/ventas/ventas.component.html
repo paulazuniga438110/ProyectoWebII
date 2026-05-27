@@ -37,9 +37,18 @@
 
         <!-- Botones de autenticación -->
         <div class="auth">
-          <a routerLink="/login" routerLinkActive="active" class="nav-link btn ghost">Iniciar Sesión</a>
-          <a routerLink="/registro" routerLinkActive="active" class="nav-link btn ghost">Registrarse</a>
-
+          <ng-container *ngIf="!isLoggedIn">
+            <a routerLink="/login" class="nav-link btn ghost">Iniciar Sesión</a>
+            <a route rLink="/registro" class="nav-link btn ghost">Registrarse</a>
+          </ng-container>
+          <ng-container *ngIf="isLoggedIn">
+            <span style="font-size: 0.95rem; font-weight: 500; margin-right: 12px; color: #ffffff;">
+              ¡Hola, {{ nombreUsuario }}!
+            </span>
+            <button (click)="cerrarSesion()" class="btn ghost" style="cursor: pointer; border: 1px solid rgba(255,255,255,0.3); padding: 0.5rem 1rem; border-radius: 4px;">
+              Cerrar Sesión
+            </button>
+          </ng-container>
           <div class="logo">
             <a href="#"><img src="/car.png" alt="Carrito" class="car-img" /></a>
           </div>
@@ -51,7 +60,6 @@
   <!-- ============ CONTENIDO DE VENTAS ORIGINAL (RESPETADO) ============ -->
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
     <div class="container">
 
       <header class="ventas-header">
@@ -59,8 +67,7 @@
           <h1>Gestión de Ventas</h1>
           <p>Administra y registra todas las ventas de la farmacia</p>
         </div>
-
-        <button class="btn-primary">+ Nueva Venta</button>
+        <!-- Botón Nueva Venta eliminado -->
       </header>
 
       <!-- ESTADÍSTICAS -->
@@ -72,7 +79,6 @@
             <p class="value">$2,894,000</p>
           </div>
         </div>
-
         <div class="card stat-card">
           <span class="icon">🛒</span>
           <div>
@@ -80,7 +86,6 @@
             <p class="value">4</p>
           </div>
         </div>
-
         <div class="card stat-card">
           <span class="icon">📈</span>
           <div>
@@ -88,7 +93,6 @@
             <p class="value">$723,000</p>
           </div>
         </div>
-
         <div class="card stat-card">
           <span class="icon">📅</span>
           <div>
@@ -108,18 +112,14 @@
             <span class="sale-id">V001</span>
             <span class="sale-date">2024-09-22</span>
           </div>
-
           <div class="sale-body">
             <p><strong>Cliente:</strong> María García</p>
-
             <div class="product-list">
               <span>Ginkgo x2</span>
               <span>Té Verde x1</span>
             </div>
-
             <p><strong>Método:</strong> Tarjeta</p>
           </div>
-
           <div class="sale-footer">
             <span class="badge green">Completada</span>
             <span class="total">$734</span>
@@ -132,17 +132,13 @@
             <span class="sale-id">V004</span>
             <span class="sale-date">2024-09-21</span>
           </div>
-
           <div class="sale-body">
             <p><strong>Cliente:</strong> Luis Torres</p>
-
             <div class="product-list">
               <span>Manzanilla x4</span>
             </div>
-
             <p><strong>Método:</strong> Tarjeta</p>
           </div>
-
           <div class="sale-footer">
             <span class="badge yellow">Pendiente</span>
             <span class="total">$500</span>
@@ -162,22 +158,19 @@
         <p>📧 samadagmail.com</p>
         <p>📍 Popayán, Cauca</p>
       </div>
-
       <div>
         <h3>Horarios de Atención</h3>
         <p>Lunes a Viernes: 9:00 AM - 6:00 PM</p>
         <p>Sábados: 9:00 AM - 6:00 PM</p>
       </div>
-
       <div>
-        <h3>Natural's SAMADA</h3>
+        <h3>Natural's Samada</h3>
         <p>El mejor socio para un plan de vida saludable</p>
         <p class="licencia">Licencia sanitaria: COFEPRIS-123456</p>
       </div>
     </div>
-
     <div class="footer-bottom">
-      <p>© 2024 Natural's Samada Farmacia Naturista. Todos los derechos reservados.</p>
+      <p>© 2024 Natural's Samada Farmacia Naturista. Todos los dereccios reservados.</p>
     </div>
   </footer>
 

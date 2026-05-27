@@ -1,16 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { Router } from 'express';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-ventas',
   standalone: true,
-  imports: [CommonModule,RouterModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './ventas.component.html',
   styleUrls: ['./ventas.component.css']
 })
-export class VentasComponent {
+export class VentasComponent implements OnInit {
+
+  // Sesión
+  isLoggedIn: boolean = false;
+  nombreUsuario: string = '';
 
   sales = [
     {
@@ -25,8 +28,33 @@ export class VentasComponent {
       status: "Completada",
       paymentMethod: "Tarjeta"
     },
-    // ...copias las demás ventas aquí
   ];
+
+  constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    this.verificarSesion();
+  }
+
+  verificarSesion(): void {
+    if (typeof window !== 'undefined') {
+      const usuarioRaw = localStorage.getItem('usuario');
+      if (usuarioRaw) {
+        this.isLoggedIn = true;
+        this.nombreUsuario = JSON.parse(usuarioRaw).nombre || 'Administrador';
+      } else {
+        this.isLoggedIn = false;
+        this.nombreUsuario = '';
+      }
+    }
+  }
+
+  cerrarSesion(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    this.isLoggedIn = false;
+    this.router.navigate(['/login']);
+  }
 
   get totalSales() {
     return this.sales.reduce((s, x) => s + x.total, 0);
@@ -56,5 +84,4 @@ export class VentasComponent {
   openDialog() {
     alert("Aquí abrirás tu modal en Angular");
   }
-
 }

@@ -1,167 +1,146 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestión de Clientes</title>
-    <link rel="stylesheet" href="clientes.component.css" />
-  </head>
-  <body>
-    <!-- HEADER -->
-    <header class="header">
-      <div class="container header-content">
-        <!-- Logo -->
-        <div class="logo">
-          <img src="/logotipo.png" alt="Logo Samada" class="logo-img" />
-          <p class="brand-name">Natural's Samada</p>
-        </div>
-
-        <!-- Checkbox oculto -->
-        <input type="checkbox" id="menu-toggle" class="menu-checkbox" />
-
-        <!-- Botón hamburguesa -->
-        <label for="menu-toggle" class="menu-icon">☰</label>
-
-        <!-- Menú + Botones -->
-        <div class="menu-right">
-          <nav class="nav">
-            <a routerLink="/" class="nav-link" routerLinkActive="active"
-              >Inicio</a
-            >
-            <a
-              routerLink="/productos"
-              class="nav-link"
-              routerLinkActive="active"
-              >Productos</a
-            >
-            <a routerLink="/clientes" class="nav-link" routerLinkActive="active"
-              >Clientes</a
-            >
-            <a
-              routerLink="/proveedores"
-              class="nav-link"
-              routerLinkActive="active"
-              >Proveedores</a
-            >
-            <a routerLink="/ventas" class="nav-link" routerLinkActive="active"
-              >Ventas</a
-            >
-          </nav>
-
-          <div class="auth">
-            <a routerLink="/login" routerLinkActive="active" class="btn ghost"
-              >Iniciar Sesión</a
-            >
-            <a
-              routerLink="/registro"
-              routerLinkActive="active"
-              class="btn ghost"
-              >Registrarse</a
-            >
-
-            <div class="logo">
-              <a href="#">
-                <img src="/car.png" alt="Carrito" class="car-img" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <div class="container">
-      <!-- Título -->
-      <h1>Gestión de Clientes</h1>
-      <p class="subtitle">Administra tu base de clientes registrados</p>
-      <button class="btn btn-primary">+ Nuevo Cliente</button>
-
-      <!-- Búsqueda -->
-      <div class="search-box">
-        <input
-          type="text"
-          placeholder="Buscar clientes por nombre o email..."
-        />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Clientes</title>
+  <link rel="stylesheet" href="clientes.component.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="container header-content">
+      <div class="logo">
+        <img src="/logotipo.png" alt="Logo Samada" class="logo-img" />
+        <p class="brand-name">Natural's Samada</p>
       </div>
 
-      <!-- Estadísticas -->
-      <div class="stats">
-        <div class="card">
-          <p>Total Clientes</p>
-          <h2>5</h2>
-        </div>
-        <div class="card">
-          <p>Ventas Totales</p>
-          <h2>$17,980</h2>
-        </div>
-      </div>
+      <input type="checkbox" id="menu-toggle" class="menu-checkbox" />
+      <label for="menu-toggle" class="menu-icon">☰</label>
 
-      <!-- Lista de clientes -->
-      <div class="grid-clients">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">María García López</h3>
-            <span class="badge gray">Activo</span>
-          </div>
-          <div class="client-info">
-            <p>Email: maria.garcia&#64;email.com</p>
-            <p>Tel: +57 1234 5678</p>
-            <p>Cliente desde: 2024-01-15</p>
-            <p>Total compras: 15</p>
-            <p>Total gastado: $4,580</p>
-            <p>Última compra: 2024-09-15</p>
+      <div class="menu-right">
+        <nav class="nav">
+          <a routerLink="/" class="nav-link" routerLinkActive="active">Inicio</a>
+          <a routerLink="/productos" class="nav-link" routerLinkActive="active">Productos</a>
+          <a routerLink="/clientes" class="nav-link" routerLinkActive="active">Clientes</a>
+          <a routerLink="/proveedores" class="nav-link" routerLinkActive="active">Proveedores</a>
+          <a routerLink="/ventas" class="nav-link" routerLinkActive="active">Ventas</a>
+        </nav>
+
+        <div class="auth">
+          <ng-container *ngIf="!isLoggedIn">
+            <a routerLink="/login" routerLinkActive="active" class="btn ghost">Iniciar Sesión</a>
+            <a routerLink="/registro" routerLinkActive="active" class="btn ghost">Registrarse</a>
+          </ng-container>
+
+          <ng-container *ngIf="isLoggedIn">
+            <span class="user-greeting" style="font-size: 0.95rem; font-weight: 500; margin-right: 12px; color: #ffffff;">
+              ¡Hola, {{ nombreUsuario }}!
+            </span>
+            <button (click)="cerrarSesion()" class="btn ghost" style="cursor: pointer; border: 1px solid rgba(255,255,255,0.3); padding: 0.5rem 1rem; border-radius: 4px;">
+              Cerrar Sesión
+            </button>
+          </ng-container>
+
+          <div class="logo">
+            <a href="#">
+              <img src="/car.png" alt="Carrito" class="car-img" />
+            </a>
           </div>
         </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Carlos Rodríguez Méndez</h3>
-            <span class="badge gray">Activo</span>
-          </div>
-          <div class="client-info">
-            <p>Email: carlos.rodriguez&#64;email.com</p>
-            <p>Tel: +57 55 9876 5432</p>
-            <p>Cliente desde: 2024-02-20</p>
-            <p>Total compras: 8</p>
-            <p>Total gastado: $2,340</p>
-            <p>Última compra: 2024-09-10</p>
-          </div>
-        </div>
-
-        <!-- Más clientes aquí -->
       </div>
     </div>
-    <!-- FOOTER -->
-    <footer class="footer">
-      <div class="container footer-grid">
-        <!-- Información de contacto -->
-        <div>
-          <h3>Información de Contacto</h3>
-          <p>📞 +57 3166412518</p>
-          <p>📧 samadagmail.com</p>
-          <p>📍 Popayán, Cauca</p>
-        </div>
+  </header>
 
-        <!-- Horarios -->
-        <div>
-          <h3>Horarios de Atención</h3>
-          <p>Lunes a Viernes: 9:00 AM - 6:00 PM</p>
-          <p>Sábados: 9:00 AM - 6:00 PM</p>
-        </div>
+  <div class="container">
+    <h1>Gestión de Clientes</h1>
+    <p class="subtitle">Administra tu base de clientes registrados</p>
 
-        <!-- Información adicional -->
-        <div>
-          <h3>Natural's SAMADA</h3>
-          <p>El mejor socio para un plan de vida saludable</p>
-          <p class="licencia">Licencia sanitaria: COFEPRIS-123456</p>
+    <!-- Solo visible para ADMIN -->
+    <button class="btn btn-primary" *ngIf="esAdmin" (click)="toggleFormulario()">
+      + Nuevo Cliente
+    </button>
+
+    <div *ngIf="mostrarFormulario" class="modal-backdrop">
+      <div class="formulario-cliente">
+        <h2>Nuevo Cliente</h2>
+        <input type="text" placeholder="DNI" [(ngModel)]="nuevoCliente.dni" />
+        <input type="text" placeholder="Nombre" [(ngModel)]="nuevoCliente.nombre" />
+        <input type="email" placeholder="Correo" [(ngModel)]="nuevoCliente.correo" />
+        <input type="password" placeholder="Contraseña" [(ngModel)]="nuevoCliente.password" />
+        <input type="text" placeholder="Teléfono" [(ngModel)]="nuevoCliente.telefono" />
+        <input type="text" placeholder="Dirección" [(ngModel)]="nuevoCliente.direccion" />
+        <div class="buttons">
+          <button (click)="agregarCliente()">Guardar</button>
+          <button (click)="toggleFormulario()">Cancelar</button>
         </div>
       </div>
+    </div>
 
-      <div class="footer-bottom">
-        <p>
-          © 2024 Natural's Samada Farmacia Naturista. Todos los derechos
-          reservados.
-        </p>
+    <div class="search-box">
+      <input 
+        type="text" 
+        placeholder="Buscar clientes por nombre o email..." 
+        [(ngModel)]="searchTerm"
+        (input)="filtrarClientes()"
+      />
+    </div>
+
+    <div class="stats">
+      <div class="card">
+        <p>Total Clientes</p>
+        <h2>{{ clientes.length }}</h2>
       </div>
-    </footer>
-  </body>
+      <div class="card">
+        <p>Clientes Filtrados</p>
+        <h2>{{ clientesFiltrados.length }}</h2>
+      </div>
+    </div>
+
+    <div class="grid-clients">
+      <div class="card" *ngFor="let cliente of clientesFiltrados">
+        <div class="card-header">
+          <h3 class="card-title">{{ cliente.nombre }}</h3>
+          <span class="badge gray">Activo</span>
+        </div>
+        <div class="client-info">
+          <p><strong>DNI:</strong> {{ cliente.dni }}</p>
+          <p><strong>Email:</strong> {{ cliente.correo }}</p>
+          <p><strong>Tel:</strong> {{ cliente.telefono }}</p>
+          <p><strong>Dirección:</strong> {{ cliente.direccion }}</p>
+        </div>
+        <!-- Solo visible para ADMIN -->
+        <div class="card-actions" *ngIf="esAdmin" style="margin-top: 1rem;">
+          <button class="btn-delete" (click)="eliminarCliente(cliente.id)" style="background-color: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
+            Eliminar
+          </button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <h3>Información de Contacto</h3>
+        <p>📞 +57 3166412518</p>
+        <p>📧 samadagmail.com</p>
+        <p>📍 Popayán, Cauca</p>
+      </div>
+      <div>
+        <h3>Horarios de Atención</h3>
+        <p>Lunes a Viernes: 9:00 AM - 6:00 PM</p>
+        <p>Sábados: 9:00 AM - 6:00 PM</p>
+      </div>
+      <div>
+        <h3>Natural's Samada</h3>
+        <p>El mejor socio para un plan de vida saludable</p>
+        <p class="licencia">Licencia sanitaria: COFEPRIS-123456</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 Natural's Samada Farmacia Naturista. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+</body>
 </html>

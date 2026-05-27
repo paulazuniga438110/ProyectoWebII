@@ -9,127 +9,222 @@
 
   <body class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- HEADER -->
+
       <header class="header">
         <div class="container header-content">
-          <!-- Logo -->
+
           <div class="logo">
             <img src="/logotipo.png" alt="Logo Samada" class="logo-img" />
             <p class="brand-name">Natural's Samada</p>
           </div>
 
-          <!-- Checkbox oculto -->
+
           <input type="checkbox" id="menu-toggle" class="menu-checkbox" />
 
-          <!-- Icono de menú -->
+
           <label for="menu-toggle" class="menu-icon">☰</label>
 
-          <!-- Menú de navegación -->
+
           <div class="menu-right">
             <nav class="nav">
-              <a routerLink="/" routerLinkActive="active" class="nav-link"
-                >Inicio</a
-              >
-              <a
-                routerLink="/productos"
-                routerLinkActive="active"
-                class="nav-link"
-                >Productos</a
-              >
-              <a
-                routerLink="/clientes"
-                routerLinkActive="active"
-                class="nav-link"
-                >Clientes</a
-              >
-              <a
-                routerLink="/proveedores"
-                routerLinkActive="active"
-                class="nav-link"
-                >Proveedores</a
-              >
-              <a routerLink="/ventas" routerLinkActive="active" class="nav-link"
-                >Ventas</a
-              >
+              <a routerLink="/" routerLinkActive="active"
+                class="nav-link">Inicio</a>
+              <a routerLink="/productos" routerLinkActive="active"
+                class="nav-link">Productos</a>
+              <a routerLink="/clientes" routerLinkActive="active"
+                class="nav-link">Clientes</a>
+              <a routerLink="/proveedores" routerLinkActive="active"
+                class="nav-link">Proveedores</a>
+              <a routerLink="/ventas" routerLinkActive="active"
+                class="nav-link">Ventas</a>
             </nav>
 
-            <!-- Botones de autenticación -->
-            <div class="auth">
-              <a
-                routerLink="/login"
-                routerLinkActive="active"
-                class="nav-link btn ghost"
-                >Iniciar Sesión</a
-              >
-              <a
-                routerLink="/registro"
-                routerLinkActive="active"
-                class="nav-link btn ghost"
-                >Registrarse</a
-              >
 
+            <div class="auth">
+              <ng-container *ngIf="!isLoggedIn">
+                <a routerLink="/login" class="nav-link btn ghost">Iniciar
+                  Sesión</a>
+                <a routerLink="/registro"
+                  class="nav-link btn ghost">Registrarse</a>
+              </ng-container>
+              <ng-container *ngIf="isLoggedIn">
+                <span
+                  style="font-size: 0.95rem; font-weight: 500; margin-right: 12px; color: #ffffff;">
+                  ¡Hola, {{ nombreUsuario }}!
+                </span>
+                <button (click)="cerrarSesion()" class="btn ghost"
+                  style="cursor: pointer; border: 1px solid rgba(255,255,255,0.3); padding: 0.5rem 1rem; border-radius: 4px;">
+                  Cerrar Sesión
+                </button>
+              </ng-container>
               <div class="logo">
                 <a href="#"
-                  ><img src="/car.png" alt="Carrito" class="car-img"
-                /></a>
+                  (click)="toggleCarrito(); $event.preventDefault()"><img
+                    src="/car.png" alt="Carrito" class="car-img" /></a>
               </div>
             </div>
           </div>
         </div>
       </header>
-      <!-- PANEL CARRITO -->
+
       <div *ngIf="mostrarCarrito" class="carrito-panel">
         <div class="carrito-header">
-          <h2>🛒 Carrito</h2>
+          <h2 style="color:#1a1a1a;">🛒 Carrito ({{ getCantidadTotal() }})</h2>
           <button class="cerrar-btn" (click)="toggleCarrito()">✖</button>
         </div>
 
         <div class="carrito-items">
-          <div *ngFor="let item of carrito" class="carrito-item">
-            <img
-              [src]="item.imagen"
-              alt="{{ item.nombre }}"
-              class="carrito-img"
-            />
+          <div *ngIf="carrito.length === 0"
+            style="text-align:center; padding:1rem; color:#666;">
+            El carrito está vacío
+          </div>
 
-            <div class="carrito-info">
-              <p class="item-nombre">{{ item.nombre }}</p>
-              <p class="item-precio">${{ item.precio | number }}</p>
+          <div *ngFor="let item of carrito" class="carrito-item"
+            style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 0; border-bottom:1px solid #060505;">
+            <img [src]="item.imagen || '/logotipo.png'" alt="{{ item.nombre }}"
+              class="carrito-img"
+              style="width:50px; height:50px; object-fit:cover; border-radius:4px;" />
+            <div class="carrito-info" style="flex:1;">
+              <p class="item-nombre"
+                style="font-weight:600; font-size:0.9rem;">{{ item.nombre }}</p>
+              <p class="item-precio" style="color:#16a34a; font-weight:600;">${{
+                item.preciov || item.precio | number }}</p>
+              <div
+                style="display:flex; align-items:center; gap:0.5rem; margin-top:0.3rem;">
+                <button (click)="disminuirCantidad(item)"
+                  style="background:#dc3545; color:white; border:none; width:24px; height:24px; border-radius:50%; cursor:pointer; font-size:1rem; line-height:1;">−</button>
+                <span style="font-weight:600;">{{ item.cantidad }}</span>
+                <button (click)="aumentarCantidad(item)"
+                  style="background:#16a34a; color:white; border:none; width:24px; height:24px; border-radius:50%; cursor:pointer; font-size:1rem; line-height:1;">+</button>
+                <button (click)="eliminarDelCarrito(item)"
+                  style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:0.8rem; margin-left:0.5rem;">🗑️</button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="carrito-footer">
-          <h3>Total: ${{ getTotal() | number }}</h3>
+        <div class="carrito-footer"
+          style="padding:1rem 0; border-top:2px solid #eee;">
+          <h3
+            style="margin-bottom:0.5rem; color:#1a1a1a; font-weight:700;">Total:
+            ${{ getTotal() | number }}</h3>
+          <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+            <button (click)="vaciarCarrito()"
+              style="flex:1; background:#dc3545; color:white; border:none; padding:0.5rem; border-radius:4px; cursor:pointer;">
+              Eliminar Compras
+            </button>
+            <button
+              style="flex:1; background:#16a34a; color:white; border:none; padding:0.5rem; border-radius:4px; cursor:pointer;">
+              Comprar
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- CONTENIDO PRINCIPAL -->
+
       <main class="productos-main">
         <section class="catalogo">
           <h1 class="titulo">Catálogo de Productos</h1>
-          <p class="subtitulo">
-            Descubre nuestra amplia gama de productos naturales para tu
-            bienestar
-          </p>
+          <p class="subtitulo">Descubre nuestra amplia gama de productos
+            naturales para tu bienestar</p>
 
-          <!-- Filtros -->
+          <div style="margin-bottom: 1rem;">
+            <button *ngIf="esAdmin" class="btn btn-outline-card"
+              (click)="toggleFormulario()"
+              style="padding: 0.6rem 1.5rem; font-size: 1rem;">
+              + Nuevo Producto
+            </button>
+          </div>
+
+          <div *ngIf="mostrarFormulario" class="modal-backdrop"
+            style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; display:flex; align-items:center; justify-content:center;">
+            <div
+              style="background:rgb(15, 74, 38); padding:2rem; border-radius:8px; width:400px; max-width:90%; color:#fff; max-height:90vh; overflow-y:auto;">
+              <h2
+                style="margin-bottom:1rem; color:#fff; text-align:center;">Nuevo
+                Producto</h2>
+
+              <label
+                style="font-size:0.8rem; font-weight:600; color:#ccc;">Código
+                Interno *</label>
+              <input type="text" placeholder="Ej: PROD-001"
+                [(ngModel)]="nuevoProducto.codigo"
+                style="width:100%; margin-bottom:0.5rem; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" />
+
+              <label
+                style="font-size:0.8rem; font-weight:600; color:#ccc;">Nombre
+                del producto *</label>
+              <input type="text" placeholder="Ej: Té Verde Orgánico"
+                [(ngModel)]="nuevoProducto.nombre"
+                style="width:100%; margin-bottom:0.5rem; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" />
+
+              <label
+                style="font-size:0.8rem; font-weight:600; color:#ccc;">Precio de
+                costo *</label>
+              <input type="number" placeholder="Ej: 5000"
+                [(ngModel)]="nuevoProducto.precio"
+                style="width:100%; margin-bottom:0.5rem; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" />
+
+              <label
+                style="font-size:0.8rem; font-weight:600; color:#ccc;">Precio de
+                venta *</label>
+              <input type="number" placeholder="Ej: 8000"
+                [(ngModel)]="nuevoProducto.preciov"
+                style="width:100%; margin-bottom:0.5rem; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" />
+
+              <label
+                style="font-size:0.8rem; font-weight:600; color:#ccc;">Stock
+                disponible</label>
+              <input type="number" placeholder="Ej: 50"
+                [(ngModel)]="nuevoProducto.stock"
+                style="width:100%; margin-bottom:0.5rem; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" />
+
+              <label
+                style="font-size:0.8rem; font-weight:600; color:#ccc;">Categoría</label>
+              <input type="text" placeholder="Ej: Suplementos"
+                [(ngModel)]="nuevoProducto.categoria"
+                style="width:100%; margin-bottom:0.5rem; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" />
+
+              <label style="font-size:0.8rem; font-weight:600; color:#ccc;">URL
+                de imagen</label>
+              <input type="text" placeholder="Ej: /imagenes/producto.png"
+                [(ngModel)]="nuevoProducto.imagen"
+                style="width:100%; margin-bottom:0.5rem; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" />
+
+              <label
+                style="font-size:0.8rem; font-weight:600; color:#ccc;">Descuento
+                (%)</label>
+              <input type="number" placeholder="Ej: 10" min="0" max="100"
+                [(ngModel)]="nuevoProducto.descuento"
+                style="width:100%; margin-bottom:0.5rem; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" />
+
+              <label style="font-size:0.8rem; font-weight:600; color:#ccc;">ID
+                Proveedor (opcional)</label>
+              <input type="number" placeholder="Ej: 1"
+                [(ngModel)]="nuevoProducto.proveedorId"
+                style="width:100%; margin-bottom:1rem; padding:0.5rem; border:1px solid #ccc; border-radius:4px;" />
+
+              <div style="display:flex; gap:1rem;">
+                <button (click)="agregarProducto()"
+                  style="background:#16a34a; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer;">
+                  Guardar
+                </button>
+                <button (click)="toggleFormulario()"
+                  style="background:#dc3545; color:white; border:none; padding:0.5rem 1rem; border-radius:4px; cursor:pointer;">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div class="filtros">
             <div class="campo-busqueda">
-              <input
-                type="text"
-                placeholder="Buscar productos..."
+              <input type="text" placeholder="Buscar productos..."
                 class="input-busqueda"
-                [(ngModel)]="textoBusqueda"
-                (input)="filtrarProductos()"
-              />
+                [(ngModel)]="textoBusqueda" (input)="filtrarProductos()" />
             </div>
-
-            <select
-              class="select-categoria"
-              [(ngModel)]="categoriaSeleccionada"
-              (change)="filtrarProductos()"
-            >
+            <select class="select-categoria" [(ngModel)]="categoriaSeleccionada"
+              (change)="filtrarProductos()">
               <option>Todas las categorías</option>
               <option>Goteros</option>
               <option>Pastilleros</option>
@@ -140,36 +235,36 @@
             </select>
           </div>
 
-          <!-- Productos -->
-          <div
-            id="productos-grid"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          >
+          <div id="productos-grid"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <div class="card" *ngFor="let p of productosFiltrados">
-              <img [src]="p.imagen" [alt]="p.nombre" />
-              <span class="badge">-{{ p.descuento }}%</span>
-              <h3 class="product-name">{{ p.nombre }}</h3>
-              <p class="price">${{ p.precio | number }}</p>
-              <button
-                class="btn btn-outline-card"
-                (click)="agregarAlCarrito(p)"
-              >
+              <img [src]="p.imagen || '/logotipo.png'" [alt]="p.nombre" />
+              <span class="badge" *ngIf="p.descuento > 0">-{{ p.descuento
+                }}%</span>
+              <h3 class="product-name"
+                style="color: #333333; font-weight: 600;">{{ p.nombre }}</h3>
+              <p class="price">${{ p.preciov || p.precio | number }}</p>
+              <button class="btn btn-outline-card"
+                (click)="agregarAlCarrito(p)">
                 Agregar al Carrito
+              </button>
+              <button *ngIf="esAdmin" (click)="eliminarProducto(p.id)"
+                class="btn btn-outline-card"
+                style="background:#dc3545; border-color:#dc3545; margin-top:0.5rem;">
+                Eliminar
               </button>
             </div>
           </div>
 
-          <p class="resultados">
-            Mostrando {{ productosFiltrados.length }} de
-            {{ productos.length }} productos
-          </p>
+          <p class="resultados">Mostrando {{ productosFiltrados.length }} de {{
+            productos.length }} productos</p>
         </section>
       </main>
     </div>
-    <!-- FOOTER -->
+
     <footer class="footer">
       <div class="container footer-grid">
-        <!-- Información de contacto -->
+
         <div>
           <h3>Información de Contacto</h3>
           <p>📞 +57 3166412518</p>
@@ -177,26 +272,24 @@
           <p>📍 Popayán, Cauca</p>
         </div>
 
-        <!-- Horarios -->
+
         <div>
           <h3>Horarios de Atención</h3>
           <p>Lunes a Viernes: 9:00 AM - 6:00 PM</p>
           <p>Sábados: 9:00 AM - 6:00 PM</p>
         </div>
 
-        <!-- Información adicional -->
+        
         <div>
-          <h3>Natural's SAMADA</h3>
+          <h3>Natural's Samada</h3>
           <p>El mejor socio para un plan de vida saludable</p>
           <p class="licencia">Licencia sanitaria: COFEPRIS-123456</p>
         </div>
       </div>
 
       <div class="footer-bottom">
-        <p>
-          © 2024 Natural's Samada Farmacia Naturista. Todos los derechos
-          reservados.
-        </p>
+        <p>© 2024 Natural's Samada Farmacia Naturista. Todos los derechos
+          reservados.</p>
       </div>
     </footer>
   </body>

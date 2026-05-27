@@ -1,220 +1,209 @@
-<!DOCTYPE html>
-<html lang="es">
+<!-- HEADER -->
+<header class="header">
+  <div class="container header-content">
+    <!-- Logo -->
+    <div class="logo">
+      <img src="/logotipo.png" alt="Logo Samada" class="logo-img" />
+      <p class="brand-name">Natural's Samada</p>
+    </div>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestión de Proveedores - Natural's Samada</title>
-  <link rel="stylesheet" href="proveedores.component.css">
-</head>
+    <!-- Checkbox oculto -->
+    <input type="checkbox" id="menu-toggle" class="menu-checkbox" />
 
-<body>
-  <!-- HEADER -->
-  <header class="header">
-    <div class="container header-content">
-      <!-- Logo -->
-      <div class="logo">
-        <img src="/logotipo.png" alt="Logo Samada" class="logo-img" />
-        <p class="brand-name">Natural's Samada</p>
-      </div>
+    <!-- Label actúa como botón hamburguesa -->
+    <label for="menu-toggle" class="menu-icon">☰</label>
 
-      <!-- Checkbox oculto -->
-      <input type="checkbox" id="menu-toggle" class="menu-checkbox" />
+    <!-- Menú + Botones agrupados -->
+    <div class="menu-right">
+      <nav class="nav">
+        <a routerLink="/" class="nav-link">Inicio</a>
+        <a routerLink="/productos" class="nav-link">Productos</a>
+        <a routerLink="/clientes" class="nav-link">Clientes</a>
+        <a routerLink="/proveedores" class="nav-link active">Proveedores</a>
+        <a routerLink="/ventas" class="nav-link">Ventas</a>
+      </nav>
 
-      <!-- Label actúa como botón hamburguesa -->
-      <label for="menu-toggle" class="menu-icon">☰</label>
-
-      <!-- Menú + Botones agrupados -->
-      <div class="menu-right">
-        <nav class="nav">
-          <a routerLink="/" class="nav-link">Inicio</a>
-          <a routerLink="/productos" class="nav-link">Productos</a>
-          <a routerLink="/clientes" class="nav-link">Clientes</a>
-          <a routerLink="/proveedores" class="nav-link active">Proveedores</a>
-          <a routerLink="/ventas" class="nav-link">Ventas</a>
-        </nav>
-        <div class="auth">
+      <div class="auth">
+        <ng-container *ngIf="!isLoggedIn">
           <a routerLink="/login" class="btn ghost">Iniciar Sesión</a>
           <a routerLink="/registro" class="btn ghost">Registrarse</a>
-          <div class="logo">
-            <a routerLink="/carrito">
-              <img src="/car.png" alt="Carrito" class="car-img" />
-            </a>
-          </div>
+        </ng-container>
+        <ng-container *ngIf="isLoggedIn">
+          <span style="font-size: 0.95rem; font-weight: 500; margin-right: 12px; color: #fef6f6;">
+            ¡Hola, {{ nombreUsuario }}!
+          </span>
+          <button (click)="cerrarSesion()" class="btn ghost"
+            style="cursor: pointer; border: 1px solid rgba(42, 40, 40, 0.3); padding: 0.5rem 1rem; border-radius: 4px;">
+            Cerrar Sesión
+          </button>
+        </ng-container>
+        <div class="logo">
+          <a routerLink="/carrito">
+            <img src="/car.png" alt="Carrito" class="car-img" />
+          </a>
         </div>
       </div>
-    </div>
-  </header>
-
-  <!-- CONTENIDO PRINCIPAL -->
-  <div class="main-container">
-    <div class="container-inner">
-      <!-- Header de Proveedores -->
-      <div class="page-header">
-        <div class="header-text">
-          <h1>Gestión de Proveedores</h1>
-          <p>Administra tu red de proveedores y distribuidores</p>
-        </div>
-        <button class="btn btn-primary" (click)="openModal()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          <span>Nuevo Proveedor</span>
-        </button>
-      </div>
-
-      <!-- Search -->
-      <div class="search-box">
-        <div class="search-input-wrapper">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
-          </svg>
-          <input type="text" class="input" placeholder="Buscar proveedores por nombre o productos..."
-            [(ngModel)]="searchTerm" (input)="filterSuppliers()"/>
-        </div>
-      </div>
-
-      <!-- Stats -->
-      <div class="stats-grid">
-        <div class="card">
-          <div class="stat-content">
-            <svg class="stat-icon-svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a"
-              stroke-width="2">
-              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-            </svg>
-            <div>
-              <p class="stat-label">Total Proveedores</p>
-              <p class="stat-value">{{ suppliers.length }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="stat-content">
-            <div class="stat-icon green">✓</div>
-            <div>
-              <p class="stat-label">Activos</p>
-              <p class="stat-value">{{ getActiveCount() }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="stat-content">
-            <div class="stat-icon yellow">⏳</div>
-            <div>
-              <p class="stat-label">Pendientes</p>
-              <p class="stat-value">{{ getPendingCount() }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="stat-content">
-            <div class="stat-icon blue">⭐</div>
-            <div>
-              <p class="stat-label">Rating Promedio</p>
-              <p class="stat-value">{{ getAverageRating() }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Suppliers Grid -->
-      <div *ngIf="filteredSuppliers.length > 0; else emptyState" class="suppliers-grid">
-        <div class="supplier-card" *ngFor="let supplier of filteredSuppliers">
-          <div class="supplier-header">
-            <div class="supplier-title">
-              <h3 class="supplier-name">{{ supplier.name }}</h3>
-              <span class="badge" [ngClass]="supplier.status === 'Activo' ? 'active' : 'pending'">{{ supplier.status
-                }}</span>
-            </div>
-            <div class="rating" *ngIf="supplier.rating > 0">
-              <span>{{ getRatingStars(supplier.rating) }}</span>
-              <span>({{ supplier.rating }}/5)</span>
-            </div>
-          </div>
-
-          <div class="supplier-content">
-            <div class="info-row">
-              📧 <span>{{ supplier.email }}</span>
-            </div>
-            <div class="info-row">
-              📞 <span>{{ supplier.phone }}</span>
-            </div>
-            <div class="info-row">
-              🏢 <span>{{ supplier.address || 'No especificada' }}</span>
-            </div>
-            <div class="products-section">
-              <p class="products-label">Productos:</p>
-              <div class="products-tags">
-                <span class="badge outline" *ngFor="let product of supplier.products">{{ product }}</span>
-              </div>
-            </div>
-            <div class="last-order">Último pedido: {{ supplier.lastOrder }}</div>
-            <div class="actions">
-              <button class="btn btn-sm btn-outline" (click)="contactSupplier(supplier.email)">Contactar</button>
-              <button class="btn btn-sm btn-primary" (click)="newOrder(supplier.id)">Nuevo Pedido</button>
-              <button class="btn btn-sm btn-delete" (click)="deleteSupplier(supplier.id)">Eliminar</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <ng-template #emptyState>
-        <div class="empty-state">
-          <h3>No se encontraron proveedores</h3>
-          <p>Intenta ajustar el término de búsqueda</p>
-        </div>
-      </ng-template>
     </div>
   </div>
+</header>
 
-  <!-- MODAL -->
-  <div class="modal" [class.active]="isModalOpen" (click)="closeModalOnOutside($event)">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Registrar Nuevo Proveedor</h2>
-        <button class="modal-close" (click)="closeModal()">&times;</button>
+<!-- CONTENIDO PRINCIPAL -->
+<div class="main-container">
+  <div class="container-inner">
+    <!-- Header de Proveedores -->
+    <div class="page-header">
+      <div class="header-text">
+        <h1>Gestión de Proveedores</h1>
+        <p>Administra tu red de proveedores y distribuidores</p>
       </div>
-
-      <form (ngSubmit)="addSupplier()">
-        <div class="form-group">
-          <label>Nombre de la empresa *</label>
-          <input type="text" [(ngModel)]="newSupplier.name" name="name" required />
-        </div>
-        <div class="form-group">
-          <label>Correo electrónico *</label>
-          <input type="email" [(ngModel)]="newSupplier.email" name="email" required />
-        </div>
-        <div class="form-group">
-          <label>Teléfono *</label>
-          <input type="tel" [(ngModel)]="newSupplier.phone" name="phone" required />
-        </div>
-        <div class="form-group">
-          <label>Dirección</label>
-          <input type="text" [(ngModel)]="newSupplier.address" name="address" />
-        </div>
-        <div class="form-group">
-          <label>Productos (separados por coma)</label>
-          <textarea [(ngModel)]="newSupplier.productsText" name="products"></textarea>
-        </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-outline" (click)="closeModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Registrar Proveedor</button>
-        </div>
-      </form>
+      <button class="btn btn-primary" *ngIf="esAdmin" (click)="openModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>Nuevo Proveedor</span>
+      </button>
     </div>
-  </div>
 
-  <!-- MODAL NUEVO PEDIDO -->
-<div class="modal new-order-modal" 
-     [class.active]="isOrderModalOpen" 
-     (click)="closeOrderModal($event)">
-  
+    <!-- Search -->
+    <div class="search-box">
+      <div class="search-input-wrapper">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input type="text" class="input" placeholder="Buscar proveedores por nombre o productos..."
+          [(ngModel)]="searchTerm" (input)="filterSuppliers()" />
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="card">
+        <div class="stat-content">
+          <svg class="stat-icon-svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          <div>
+            <p class="stat-label">Total Proveedores</p>
+            <p class="stat-value">{{ suppliers.length }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stat-content">
+          <div class="stat-icon green">✓</div>
+          <div>
+            <p class="stat-label">Activos</p>
+            <p class="stat-value">{{ getActiveCount() }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stat-content">
+          <div class="stat-icon yellow">⏳</div>
+          <div>
+            <p class="stat-label">Pendientes</p>
+            <p class="stat-value">{{ getPendingCount() }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stat-content">
+          <div class="stat-icon blue">⭐</div>
+          <div>
+            <p class="stat-label">Rating Promedio</p>
+            <p class="stat-value">{{ getAverageRating() }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suppliers Grid -->
+    <div *ngIf="filteredSuppliers.length > 0; else emptyState" class="suppliers-grid">
+      <div class="supplier-card" *ngFor="let supplier of filteredSuppliers">
+        <div class="supplier-header">
+          <div class="supplier-title">
+            <h3 class="supplier-name">{{ supplier.name }}</h3>
+            <span class="badge" [ngClass]="supplier.status === 'Activo' ? 'active' : 'pending'">{{ supplier.status }}</span>
+          </div>
+          <div class="rating" *ngIf="supplier.rating > 0">
+            <span>{{ getRatingStars(supplier.rating) }}</span>
+            <span>({{ supplier.rating }}/5)</span>
+          </div>
+        </div>
+
+        <div class="supplier-content">
+          <div class="info-row">📧 <span>{{ supplier.email }}</span></div>
+          <div class="info-row">📞 <span>{{ supplier.phone }}</span></div>
+          <div class="info-row">🏢 <span>{{ supplier.address || 'No especificada' }}</span></div>
+          <div class="products-section">
+            <p class="products-label">Productos:</p>
+            <div class="products-tags">
+              <span class="badge outline" *ngFor="let product of supplier.products">{{ product }}</span>
+            </div>
+          </div>
+          <div class="last-order">Último pedido: {{ supplier.lastOrder }}</div>
+          <div class="actions">
+            <button class="btn btn-sm btn-outline" (click)="contactSupplier(supplier.email)">Contactar</button>
+            <button class="btn btn-sm btn-primary" (click)="newOrder(supplier.id)">Nuevo Pedido</button>
+            <button class="btn btn-sm btn-delete" *ngIf="esAdmin" (click)="deleteSupplier(supplier.id)">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <h3>No se encontraron proveedores</h3>
+        <p>Intenta ajustar el término de búsqueda</p>
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" [class.active]="isModalOpen" (click)="closeModalOnOutside($event)">
   <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Registrar Nuevo Proveedor</h2>
+      <button class="modal-close" (click)="closeModal()">&times;</button>
+    </div>
+    <form (ngSubmit)="addSupplier()">
+      <div class="form-group">
+        <label>Nombre de la empresa *</label>
+        <input type="text" [(ngModel)]="newSupplier.name" name="name" required />
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico *</label>
+        <input type="email" [(ngModel)]="newSupplier.email" name="email" required />
+      </div>
+      <div class="form-group">
+        <label>Teléfono *</label>
+        <input type="tel" [(ngModel)]="newSupplier.phone" name="phone" required />
+      </div>
+      <div class="form-group">
+        <label>Dirección</label>
+        <input type="text" [(ngModel)]="newSupplier.address" name="address" />
+      </div>
+      <div class="form-group">
+        <label>Productos (separados por coma)</label>
+        <textarea [(ngModel)]="newSupplier.productsText" name="products"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline" (click)="closeModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Registrar Proveedor</button>
+      </div>
+    </form>
+  </div>
+</div>
 
+<!-- MODAL NUEVO PEDIDO -->
+<div class="modal new-order-modal" [class.active]="isOrderModalOpen" (click)="closeOrderModal($event)">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
     <div class="modal-header">
       <h2>Nuevo Pedido - {{ selectedSupplier?.name }}</h2>
       <button class="modal-close" (click)="isOrderModalOpen = false">&times;</button>
@@ -237,31 +226,31 @@
       <button class="btn btn-primary" (click)="confirmOrder()">Confirmar Pedido</button>
     </div>
 
+
   </div>
 </div>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="container footer-grid">
-      <div>
-        <h3>Información de Contacto</h3>
-        <p>📞 +57 3166412518</p>
-        <p>📧 samada&#64;gmail.com</p>
-        <p>📍 Popayán, Cauca</p>
-      </div>
-      <div>
-        <h3>Horarios de Atención</h3>
-        <p>Lunes a Viernes: 9:00 AM - 6:00 PM</p>
-        <p>Sábados: 9:00 AM - 6:00 PM</p>
-      </div>
-      <div>
-        <h3>Natural's SAMADA</h3>
-        <p>El mejor socio para un plan de vida saludable</p>
-        <p class="licencia">Licencia sanitaria: COFEPRIS-123456</p>
-      </div>
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container footer-grid">
+    <div>
+      <h3>Información de Contacto</h3>
+      <p>📞 +57 3166412518</p>
+      <p>📧 samada&#64;gmail.com</p>
+      <p>📍 Popayán, Cauca</p>
     </div>
-
-    <div class="footer-bottom">
-      <p>© 2025 Natural's Samada Farmacia Naturista. Todos los derechos reservados.</p>
+    <div>
+      <h3>Horarios de Atención</h3>
+      <p>Lunes a Viernes: 9:00 AM - 6:00 PM</p>
+      <p>Sábados: 9:00 AM - 6:00 PM</p>
     </div>
-  </footer>
+    <div>
+      <h3>Natural's Samada</h3>
+      <p>El mejor socio para un plan de vida saludable</p>
+      <p class="licencia">Licencia sanitaria: COFEPRIS-123456</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Natural's Samada Farmacia Naturista. Todos los derechos reservados.</p>
+  </div>
+</footer>

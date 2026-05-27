@@ -150,11 +150,11 @@ h3 {
 .nav-link:hover::after {
   width: 100%;
 }
-/* Contenedor Principal */
+
 .main-container {
   flex: 5;
   background-color: #f9fafb;
-  margin-top: 200PX;
+  margin-top: 95px;
 }
 
 .container-inner {

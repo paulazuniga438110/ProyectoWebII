@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "npx ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
@@ -22,6 +22,7 @@
     "@angular/ssr": "^19.2.17",
     "express": "^4.18.2",
     "rxjs": "~7.8.0",
+    "sweetalert2": "^11.26.20",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },

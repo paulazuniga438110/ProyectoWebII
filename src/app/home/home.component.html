@@ -8,22 +8,22 @@
   <link rel="stylesheet" href="home.component.css" />
 </head>
 
-<!-- HEADER -->
+
 <header class="header">
   <div class="container header-content">
-    <!-- Logo -->
+
     <div class="logo">
       <img src="/logotipo.png" alt="Logo Samada" class="logo-img" />
       <p class="brand-name">Natural's Samada</p>
     </div>
 
-    <!-- Checkbox oculto -->
+
     <input type="checkbox" id="menu-toggle" class="menu-checkbox">
 
-    <!-- Label actúa como botón hamburguesa -->
+
     <label for="menu-toggle" class="menu-icon">☰</label>
 
-    <!-- Menú + Botones agrupados -->
+
     <div class="menu-right">
       <nav class="nav">
         <a routerLink="/" class="nav-link" routerLinkActive="active"
@@ -33,9 +33,23 @@
         <a routerLink="/proveedores" class="nav-link" routerLinkActive="active">Proveedores</a>
         <a routerLink="/ventas" class="nav-link" routerLinkActive="active">Ventas</a>
       </nav>
+      
       <div class="auth">
-        <a routerLink="/login" class="nav-link" routerLinkActive="active" class="btn ghost">Iniciar Sesión</a>
-        <a routerLink="/registro" routerLinkActive="active" class="btn ghost">Registrarse</a>
+        
+        <ng-container *ngIf="!isLoggedIn">
+          <a routerLink="/login" class="nav-link" routerLinkActive="active" class="btn ghost">Iniciar Sesión</a>
+          <a routerLink="/registro" routerLinkActive="active" class="btn ghost">Registrarse</a>
+        </ng-container>
+
+        <ng-container *ngIf="isLoggedIn">
+          <span style="font-size: 0.95rem; font-weight: 500; margin-right: 12px; color: #ffffff;">
+            ¡Hola, {{ nombreUsuario }}!
+          </span>
+          <button (click)="cerrarSesion()" class="btn ghost" style="cursor: pointer; border: 1px solid rgba(255,255,255,0.3); padding: 0.5rem 1rem; border-radius: 4px; background: transparent; color: white;">
+            Cerrar Sesión
+          </button>
+        </ng-container>
+
         <div class="logo">
           <a href="#"><img src="/car.png" alt="Carrito" class="car-img" /></a>
         </div>
@@ -48,7 +62,7 @@
 
 <body>
 
-  <!-- Banner principal -->
+
   <section class="banner">
     <div class="banner-overlay"></div>
     <div class="banner-content">
@@ -62,7 +76,7 @@
     </div>
   </section>
 
-  <!-- Call to action -->
+
   <section class="cta">
     <h2>Bienvenido a Natural's Samada</h2>
     <p>Crea una cuenta para almacenar tu información,
@@ -74,7 +88,7 @@
     </div>
   </section>
 
-  <!-- Productos destacados -->
+
   <section class="productos">
     <h2>Productos en Oferta</h2>
     <p>Aprovecha nuestras ofertas especiales en productos naturales seleccionados</p>
@@ -114,7 +128,7 @@
     </div>
   </section>
 
-  <!-- Beneficios -->
+
   <section class="beneficios">
     <div class="beneficio">
       <div class="icono">🌿</div>
@@ -133,7 +147,7 @@
     </div>
   </section>
 
-  <!-- FOOTER -->
+
   <footer class="footer">
     <div class="container footer-grid">
       <div>
@@ -148,7 +162,7 @@
         <p>Sábados: 9:00 AM - 6:00 PM</p>
       </div>
       <div>
-        <h3>Natural's SAMADA</h3>
+        <h3>Natural's Samada</h3>
         <p>El mejor socio para un plan de vida saludable</p>
         <p class="licencia">Licencia sanitaria: COFEPRIS-123456</p>
       </div>

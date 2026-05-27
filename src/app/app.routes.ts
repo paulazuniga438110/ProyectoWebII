@@ -22,6 +22,4 @@ export const routes: Routes = [
   { path: 'terminosCondiciones', component: TerminoscondicionesComponent },
   { path: 'ventas', component: VentasComponent }
 
-
-
 ];
