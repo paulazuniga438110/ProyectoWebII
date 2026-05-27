@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms'; // Importación clave para el funcionamiento de ngModel
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ProductoService } from '../services/productos.service';
 
@@ -17,23 +18,22 @@ interface Producto {
   selector: 'app-productos',
   standalone: true,
   templateUrl: './productos.component.html',
-
   styleUrls: ['./productos.component.css'],
-  // CORRECCIÓN: Agregamos FormsModule aquí para que las búsquedas y el formulario funcionen
   imports: [CommonModule, RouterModule, FormsModule]
 })
 export class ProductosComponent implements OnInit {
+
+  // ✅ CORRECCIÓN SSR: detecta si está en el navegador o en el servidor
+  private platformId = inject(PLATFORM_ID);
 
   productos: any[] = [];
   productosFiltrados: any[] = [];
   textoBusqueda: string = '';
   categoriaSeleccionada: string = 'Todas las categorías';
 
-
   carrito: any[] = [];
   mostrarCarrito: boolean = false;
 
-  // Variables de control de sesión de usuario y rol
   isLoggedIn: boolean = false;
   nombreUsuario: string = '';
   esAdmin: boolean = false;
@@ -58,26 +58,21 @@ export class ProductosComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.cargarProductos();
-
-    // Lógica de recuperación de carrito
-    if (typeof window !== 'undefined') {
+    // ✅ CORRECCIÓN SSR: solo ejecuta en el navegador, nunca en el servidor Node.js
+    if (isPlatformBrowser(this.platformId)) {
+      this.cargarProductos();
 
       const carritoGuardado = localStorage.getItem('carrito');
       if (carritoGuardado) {
         this.carrito = JSON.parse(carritoGuardado);
       }
-    }
 
-    // LEER LA SESIÓN CON RETRASO CONTROLADO (EVITA EL BLOQUEO DE SSR)
-    setTimeout(() => {
-      this.verificarSesion();
-    }, 50);
+      setTimeout(() => this.verificarSesion(), 50);
+    }
   }
 
-  // --- MÉTODO PARA COMPROBAR LA SESIÓN Y ROL ---
   verificarSesion(): void {
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('token');
       const usuarioRaw = localStorage.getItem('usuario');
 
@@ -87,14 +82,13 @@ export class ProductosComponent implements OnInit {
           const usuarioParsed = JSON.parse(usuarioRaw);
           this.nombreUsuario = usuarioParsed.nombre || usuarioParsed.username || usuarioParsed.correo || 'Usuario';
           const rol = usuarioParsed.rol?.toUpperCase() || '';
-          this.esAdmin = (rol === 'ADMIN'); // Mantiene la lógica de que el Admin controle la gestión
+          this.esAdmin = (rol === 'ADMIN');
         } else {
           this.nombreUsuario = 'Usuario';
           this.esAdmin = false;
         }
         this.cdr.detectChanges();
       } else {
-        // LÓGICA DE VISITANTE: Al no haber token, se desmarcan los permisos pero el catálogo sigue visible
         this.isLoggedIn = false;
         this.nombreUsuario = '';
         this.esAdmin = false;
@@ -103,7 +97,6 @@ export class ProductosComponent implements OnInit {
     }
   }
 
-  // --- MÉTODO PARA EL BOTÓN DE CERRAR SESIÓN ---
   cerrarSesion(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
@@ -112,7 +105,6 @@ export class ProductosComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  // --- MÉTODOS DE NEGOCIO ---
   cargarProductos() {
     this.productoService.listar().subscribe({
       next: (data) => {
@@ -124,7 +116,6 @@ export class ProductosComponent implements OnInit {
       }
     });
   }
-
 
   filtrarProductos() {
     const texto = this.textoBusqueda.toLowerCase();
@@ -154,9 +145,10 @@ export class ProductosComponent implements OnInit {
   }
 
   guardarCarrito() {
-    localStorage.setItem('carrito', JSON.stringify(this.carrito));
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('carrito', JSON.stringify(this.carrito));
+    }
   }
-
 
   getTotal() {
     return this.carrito.reduce(
@@ -193,7 +185,6 @@ export class ProductosComponent implements OnInit {
   getCantidadTotal(): number {
     return this.carrito.reduce((total, item) => total + item.cantidad, 0);
   }
-
 
   toggleFormulario(): void {
     this.mostrarFormulario = !this.mostrarFormulario;

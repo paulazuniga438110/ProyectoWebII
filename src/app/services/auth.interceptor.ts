@@ -1,10 +1,17 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  // 1. Intentamos obtener el token JWT que guardaste en el localStorage al hacer Login
+  const platformId = inject(PLATFORM_ID);
+
+  // ✅ CORRECCIÓN SSR: localStorage solo existe en el navegador, no en Node.js
+  if (!isPlatformBrowser(platformId)) {
+    return next(req);
+  }
+
   const token = localStorage.getItem('token');
 
-  // 2. Si el token existe, clonamos la petición y le añadimos la cabecera Authorization
   if (token) {
     const clonedReq = req.clone({
       setHeaders: {
@@ -13,6 +20,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     });
     return next(clonedReq);
   }
-  // 3. Si no hay token, la petición sigue su curso normal (útil para el endpoint de login público)
+
   return next(req);
 };

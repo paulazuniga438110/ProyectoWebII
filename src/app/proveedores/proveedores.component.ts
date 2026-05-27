@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProveedorService } from '../services/proveedor.service';
@@ -23,27 +24,24 @@ interface Supplier {
   templateUrl: './proveedores.component.html',
   styleUrl: './proveedores.component.css'
 })
-
 export class ProveedoresComponent implements OnInit {
+
+  // ✅ CORRECCIÓN SSR: detecta si está en el navegador o en el servidor
+  private platformId = inject(PLATFORM_ID);
+
   suppliers: Supplier[] = [];
   filteredSuppliers: Supplier[] = [];
   searchTerm: string = '';
 
-
   isModalOpen: boolean = false;
-
 
   selectedSupplier: Supplier | null = null;
   orderData: any = {};
   isOrderModalOpen: boolean = false;
 
-  // Sesión
   isLoggedIn: boolean = false;
   nombreUsuario: string = '';
   esAdmin: boolean = false;
-
-
-
 
   newSupplier: any = {
     name: '',
@@ -57,8 +55,11 @@ export class ProveedoresComponent implements OnInit {
   constructor(private router: Router, private proveedorService: ProveedorService) { }
 
   ngOnInit(): void {
-    this.verificarSesion();
-    this.cargarProveedores();
+    // ✅ CORRECCIÓN SSR: solo ejecuta en el navegador, nunca en el servidor Node.js
+    if (isPlatformBrowser(this.platformId)) {
+      this.verificarSesion();
+      this.cargarProveedores();
+    }
   }
 
   cargarProveedores(): void {
@@ -82,15 +83,13 @@ export class ProveedoresComponent implements OnInit {
   }
 
   verificarSesion(): void {
-    if (typeof window !== 'undefined') {
+    if (isPlatformBrowser(this.platformId)) {
       const usuarioRaw = localStorage.getItem('usuario');
       if (usuarioRaw) {
         const usuarioParsed = JSON.parse(usuarioRaw);
         this.isLoggedIn = true;
         this.nombreUsuario = usuarioParsed.nombre || 'Administrador';
         this.esAdmin = usuarioParsed.rol?.toUpperCase() === 'ADMIN';
-        console.log('ROL:', usuarioParsed.rol);
-        console.log('ES ADMIN:', this.esAdmin);
       } else {
         this.isLoggedIn = false;
         this.nombreUsuario = '';

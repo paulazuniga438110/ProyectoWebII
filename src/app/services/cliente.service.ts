@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 
@@ -9,31 +9,23 @@ export class ClienteService {
 
   constructor(private http: HttpClient) {}
 
-  private getHeaders(): HttpHeaders {
-    const token = sessionStorage.getItem('token'); 
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-  }
-
   listar(): Observable<any[]> {
-    return this.http.get<any[]>(this.url, { headers: this.getHeaders() });
+    return this.http.get<any[]>(this.url);
   }
 
   buscar(nombre: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.url}/buscar?nombre=${nombre}`, { headers: this.getHeaders() });
+    return this.http.get<any[]>(`${this.url}/buscar?nombre=${nombre}`);
   }
 
   crear(cliente: any): Observable<any> {
-    return this.http.post(this.url, cliente, { headers: this.getHeaders() });
+    return this.http.post(this.url, cliente);
   }
 
   actualizar(id: number, cliente: any): Observable<any> {
-    return this.http.put(`${this.url}/${id}`, cliente, { headers: this.getHeaders() });
+    return this.http.put(`${this.url}/${id}`, cliente);
   }
 
   eliminar(id: number): Observable<any> {
-    return this.http.delete(`${this.url}/${id}`, { headers: this.getHeaders() });
+    return this.http.delete(`${this.url}/${id}`);
   }
 }

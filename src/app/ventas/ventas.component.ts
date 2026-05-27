@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 
 @Component({
@@ -11,7 +12,9 @@ import { RouterModule, Router } from '@angular/router';
 })
 export class VentasComponent implements OnInit {
 
-  // Sesión
+  // ✅ CORRECCIÓN SSR: detecta si está en el navegador o en el servidor
+  private platformId = inject(PLATFORM_ID);
+
   isLoggedIn: boolean = false;
   nombreUsuario: string = '';
 
@@ -33,11 +36,14 @@ export class VentasComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.verificarSesion();
+    // ✅ CORRECCIÓN SSR: solo ejecuta en el navegador, nunca en el servidor Node.js
+    if (isPlatformBrowser(this.platformId)) {
+      this.verificarSesion();
+    }
   }
 
   verificarSesion(): void {
-    if (typeof window !== 'undefined') {
+    if (isPlatformBrowser(this.platformId)) {
       const usuarioRaw = localStorage.getItem('usuario');
       if (usuarioRaw) {
         this.isLoggedIn = true;

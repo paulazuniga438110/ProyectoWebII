@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ClienteService } from '../services/cliente.service';
@@ -12,17 +13,19 @@ import { ClienteService } from '../services/cliente.service';
   styleUrl: './clientes.component.css'
 })
 export class ClientesComponent implements OnInit {
+
+  // ✅ CORRECCIÓN SSR: detecta si está en el navegador o en el servidor
+  private platformId = inject(PLATFORM_ID);
+
   clientes: any[] = [];
   clientesFiltrados: any[] = [];
   searchTerm: string = '';
-  
-  // Controla si se muestra el modal flotante
+
   mostrarFormulario: boolean = false;
 
-  // Variables para manejar el header y control de sesión
   isLoggedIn: boolean = false;
   nombreUsuario: string = '';
-  esAdmin: boolean = false; 
+  esAdmin: boolean = false;
 
   nuevoCliente: any = {
     dni: '',
@@ -34,27 +37,30 @@ export class ClientesComponent implements OnInit {
   };
 
   constructor(
-    private clienteService: ClienteService, 
+    private clienteService: ClienteService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.cargarClientes();
-    this.verificarSesion();
+    // ✅ CORRECCIÓN SSR: solo ejecuta en el navegador, nunca en el servidor Node.js
+    if (isPlatformBrowser(this.platformId)) {
+      this.cargarClientes();
+      this.verificarSesion();
+    }
   }
 
   verificarSesion(): void {
-    if (typeof window !== 'undefined') {
+    if (isPlatformBrowser(this.platformId)) {
       const usuarioRaw = localStorage.getItem('usuario');
       if (usuarioRaw) {
         const usuarioParsed = JSON.parse(usuarioRaw);
         this.isLoggedIn = true;
         this.nombreUsuario = usuarioParsed.nombre || 'Administrador';
-        this.esAdmin = usuarioParsed.rol?.toUpperCase() === 'ADMIN'; 
+        this.esAdmin = usuarioParsed.rol?.toUpperCase() === 'ADMIN';
       } else {
         this.isLoggedIn = false;
         this.nombreUsuario = '';
-        this.esAdmin = false; 
+        this.esAdmin = false;
       }
     }
   }
@@ -120,13 +126,13 @@ export class ClientesComponent implements OnInit {
   }
 
   private resetForm(): void {
-    this.nuevoCliente = { 
-      dni: '', 
-      nombre: '', 
-      correo: '', 
-      password: '', 
-      telefono: '', 
-      direccion: '' 
+    this.nuevoCliente = {
+      dni: '',
+      nombre: '',
+      correo: '',
+      password: '',
+      telefono: '',
+      direccion: ''
     };
   }
 }
